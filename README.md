@@ -17,6 +17,12 @@ Clicking a menu bar item focuses the IDE window for that project's directory.
 
 Claude Code [hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) write status to `~/.claude/status-<pid>` files. The spoon watches that directory and updates menu bar items accordingly. Dead sessions are automatically cleaned up.
 
+## Prerequisites
+
+- **macOS** — Hammerspoon is macOS-only
+- **[Hammerspoon](https://www.hammerspoon.org/)** — installed and running
+- **[Claude Code](https://docs.anthropic.com/en/docs/claude-code)** — Anthropic's CLI for Claude
+
 ## Installation
 
 1. Clone or copy `ClaudeStatus.spoon` to `~/.hammerspoon/Spoons/`
