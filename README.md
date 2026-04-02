@@ -105,9 +105,9 @@ Add these hooks to `~/.claude/settings.json`:
 }
 ```
 
-## Configuration
+## Configuration (Optional)
 
-Override these in your `init.lua` before calling `:start()`:
+All options have sensible defaults — no configuration is needed. If you want to customize behavior, override any of these in your `init.lua` before calling `:start()`:
 
 ```lua
 hs.loadSpoon("ClaudeStatus")
