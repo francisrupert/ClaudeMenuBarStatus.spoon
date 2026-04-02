@@ -1,4 +1,4 @@
---- === ClaudeStatus ===
+--- === ClaudeMenuBarStatus ===
 ---
 --- Per-session menu bar status indicator for Claude Code.
 ---
@@ -26,38 +26,38 @@ local obj = {}
 obj.__index = obj
 
 -- Metadata
-obj.name = "ClaudeStatus"
+obj.name = "ClaudeMenuBarStatus"
 obj.version = "1.0"
 obj.author = "Francis Rupert"
 obj.license = "MIT"
 
---- ClaudeStatus.statusDir
+--- ClaudeMenuBarStatus.statusDir
 --- Variable
 --- Directory where Claude Code status files are stored. Default: ~/.claude
 obj.statusDir = os.getenv("HOME") .. "/.claude"
 
---- ClaudeStatus.pollInterval
+--- ClaudeMenuBarStatus.pollInterval
 --- Variable
 --- Seconds between full status file scans. Compensates for missed pathwatcher events. Default: 2
 obj.pollInterval = 2
 
---- ClaudeStatus.animInterval
+--- ClaudeMenuBarStatus.animInterval
 --- Variable
 --- Seconds between animation frame changes for the "working" state. Default: 0.3
 obj.animInterval = 0.3
 
---- ClaudeStatus.debounceSeconds
+--- ClaudeMenuBarStatus.debounceSeconds
 --- Variable
 --- Seconds a "calling" status must persist before showing yellow.
 --- Filters out brief flickers from auto-approved tool permission requests. Default: 2
 obj.debounceSeconds = 2
 
---- ClaudeStatus.dotFont
+--- ClaudeMenuBarStatus.dotFont
 --- Variable
 --- Font used for the status dot emoji. Default: { size = 6 }
 obj.dotFont = { size = 5 }
 
---- ClaudeStatus.statusDots
+--- ClaudeMenuBarStatus.statusDots
 --- Variable
 --- Emoji strings for non-animated states. Keys: "calling", "done", "error".
 obj.statusDots = {
@@ -66,32 +66,32 @@ obj.statusDots = {
     error   = "🔴\u{2002}\u{2002}",
 }
 
---- ClaudeStatus.workingFrames
+--- ClaudeMenuBarStatus.workingFrames
 --- Variable
 --- Array of emoji strings that cycle to animate the "working" state.
 obj.workingFrames = { "🟠\u{2002}\u{2002}", "⚪️\u{2002}\u{2002}" }
 
---- ClaudeStatus.callingColor
+--- ClaudeMenuBarStatus.callingColor
 --- Variable
 --- hs.drawing.color table for the "calling" state background. Default: #d97757
 obj.callingColor = { red = 0.851, green = 0.467, blue = 0.341 }
 
---- ClaudeStatus.workingColor
+--- ClaudeMenuBarStatus.workingColor
 --- Variable
 --- hs.drawing.color table for the "working" state text. Default: #d97757
 obj.workingColor = { red = 0.851, green = 0.467, blue = 0.341 }
 
---- ClaudeStatus.errorColor
+--- ClaudeMenuBarStatus.errorColor
 --- Variable
 --- hs.drawing.color table for the "error" state text. Default: red
 obj.errorColor = { red = 1, green = 0.2, blue = 0.2 }
 
---- ClaudeStatus.terminalApp
+--- ClaudeMenuBarStatus.terminalApp
 --- Variable
 --- Name of the terminal application to activate on menu bar click. Default: "Warp"
 obj.terminalApp = "Warp"
 
---- ClaudeStatus.ideApp
+--- ClaudeMenuBarStatus.ideApp
 --- Variable
 --- Name of the IDE application to focus on menu bar click. Default: "Windsurf"
 obj.ideApp = "Windsurf"
@@ -105,7 +105,7 @@ obj.watcher = nil
 obj.pollTimer = nil
 obj.animTimer = nil
 
---- ClaudeStatus:styledTitle(dot, label, color) -> hs.styledtext
+--- ClaudeMenuBarStatus:styledTitle(dot, label, color) -> hs.styledtext
 --- Method
 --- Build a styled menu bar title with a small dot and a label, optionally colored.
 ---
@@ -130,7 +130,7 @@ function obj:styledTitle(dot, label, color, bgColor)
     return hs.styledtext.new(dot, dotStyle) .. hs.styledtext.new(label, labelStyle)
 end
 
---- ClaudeStatus:dirLabel(pwd, agents) -> string
+--- ClaudeMenuBarStatus:dirLabel(pwd, agents) -> string
 --- Method
 --- Extract a short display name from a full directory path.
 --- Returns "~" for the home directory, or the basename otherwise.
@@ -154,7 +154,7 @@ function obj:dirLabel(pwd, agents)
     return name
 end
 
---- ClaudeStatus:focusIdeWindow(pwd)
+--- ClaudeMenuBarStatus:focusIdeWindow(pwd)
 --- Method
 --- Focus the IDE window for the given directory by opening it via `open -a`.
 --- macOS handles switching to the correct Space automatically.
@@ -171,7 +171,7 @@ function obj:focusIdeWindow(pwd)
     end
 end
 
---- ClaudeStatus:update()
+--- ClaudeMenuBarStatus:update()
 --- Method
 --- Scan all status files, update menu bar items, and clean up stale entries.
 --- Called by the pathwatcher and poll timer.
@@ -256,7 +256,7 @@ function obj:update()
     end
 end
 
---- ClaudeStatus:animate()
+--- ClaudeMenuBarStatus:animate()
 --- Method
 --- Advance the working animation frame and update titles for all "working" sessions.
 --- Called by the animation timer. No file I/O — only updates menu bar title strings.
@@ -269,22 +269,22 @@ function obj:animate()
     end
 end
 
---- ClaudeStatus:start() -> ClaudeStatus
+--- ClaudeMenuBarStatus:start() -> ClaudeMenuBarStatus
 --- Method
 --- Start watching for Claude Code status changes.
 --- Creates a pathwatcher on the status directory, a poll timer for missed events,
 --- and an animation timer for the "working" state.
 ---
 --- Returns:
----  * The ClaudeStatus object
+---  * The ClaudeMenuBarStatus object
 function obj:start()
     local function safeUpdate()
         local ok, err = pcall(function() self:update() end)
-        if not ok then print("ClaudeStatus error: " .. tostring(err)) end
+        if not ok then print("ClaudeMenuBarStatus error: " .. tostring(err)) end
     end
     local function safeAnimate()
         local ok, err = pcall(function() self:animate() end)
-        if not ok then print("ClaudeStatus animate error: " .. tostring(err)) end
+        if not ok then print("ClaudeMenuBarStatus animate error: " .. tostring(err)) end
     end
 
     -- Global refs to prevent garbage collection
@@ -300,12 +300,12 @@ function obj:start()
     return self
 end
 
---- ClaudeStatus:stop() -> ClaudeStatus
+--- ClaudeMenuBarStatus:stop() -> ClaudeMenuBarStatus
 --- Method
 --- Stop all watchers, timers, and remove all menu bar items.
 ---
 --- Returns:
----  * The ClaudeStatus object
+---  * The ClaudeMenuBarStatus object
 function obj:stop()
     if self.watcher then self.watcher:stop() end
     if self.pollTimer then self.pollTimer:stop() end
