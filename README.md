@@ -36,11 +36,13 @@ hs.loadSpoon("ClaudeMenuBarStatus")
 spoon.ClaudeMenuBarStatus:start()
 ```
 
-4. Reload your Hammerspoon config (click the Hammerspoon menu bar icon → Reload Config, or `Cmd+Shift+R`)
+4. Reload your Hammerspoon config (click the Hammerspoon menu bar icon → Reload Config, or use your reload hotkey if you have one configured)
 
 ## Hook Configuration
 
-Merge the following `hooks` key into your existing `~/.claude/settings.json`. Don't replace the whole file — you likely have other settings in there already.
+Merge the following `hooks` key into your existing `~/.claude/settings.json`. Don't replace the whole file — you likely have other settings in there already. If you already have hooks for any of these events, add the new hook objects to the existing arrays rather than replacing them.
+
+Each hook command uses `$PPID` (the Claude Code session's process ID) and `$PWD` (the current working directory), which Claude Code automatically provides as environment variables to hook commands.
 
 ```json
 {
