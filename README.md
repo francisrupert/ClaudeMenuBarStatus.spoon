@@ -1,4 +1,4 @@
-# ClaudeStatus.spoon
+# ClaudeMenuBarStatus.spoon
 
 A [Hammerspoon](https://www.hammerspoon.org/) spoon that adds per-session menu bar indicators for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Each active session gets its own menu bar item showing the project directory name and a color-coded status dot.
 
@@ -27,13 +27,13 @@ Claude Code [hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) write 
 
 ## Installation
 
-1. Clone or copy `ClaudeStatus.spoon` to `~/.hammerspoon/Spoons/`
+1. Clone or copy `ClaudeMenuBarStatus.spoon` to `~/.hammerspoon/Spoons/`
 2. Add the hooks to `~/.claude/settings.json` (see [Hook Configuration](#hook-configuration))
 3. Load the spoon in your `~/.hammerspoon/init.lua`:
 
 ```lua
-hs.loadSpoon("ClaudeStatus")
-spoon.ClaudeStatus:start()
+hs.loadSpoon("ClaudeMenuBarStatus")
+spoon.ClaudeMenuBarStatus:start()
 ```
 
 4. Reload your Hammerspoon config (click the Hammerspoon menu bar icon → Reload Config, or `Cmd+Shift+R`)
@@ -174,23 +174,23 @@ Merge the following `hooks` key into your existing `~/.claude/settings.json`. Do
 All options have sensible defaults — no configuration is needed. If you want to customize behavior, override any of these in your `init.lua` before calling `:start()`:
 
 ```lua
-hs.loadSpoon("ClaudeStatus")
+hs.loadSpoon("ClaudeMenuBarStatus")
 
 -- Timing
-spoon.ClaudeStatus.pollInterval = 2       -- seconds between full scans
-spoon.ClaudeStatus.animInterval = 0.3     -- seconds between animation frames
-spoon.ClaudeStatus.debounceSeconds = 2    -- ignore brief "calling" flickers
+spoon.ClaudeMenuBarStatus.pollInterval = 2       -- seconds between full scans
+spoon.ClaudeMenuBarStatus.animInterval = 0.3     -- seconds between animation frames
+spoon.ClaudeMenuBarStatus.debounceSeconds = 2    -- ignore brief "calling" flickers
 
 -- Click behavior (set these to your own apps)
-spoon.ClaudeStatus.terminalApp = "Terminal"   -- fallback terminal app
-spoon.ClaudeStatus.ideApp = "VS Code"         -- IDE to focus on click
+spoon.ClaudeMenuBarStatus.terminalApp = "Terminal"   -- fallback terminal app
+spoon.ClaudeMenuBarStatus.ideApp = "VS Code"         -- IDE to focus on click
 
 -- Colors (hs.drawing.color tables)
-spoon.ClaudeStatus.callingColor = { red = 0.851, green = 0.467, blue = 0.341 }
-spoon.ClaudeStatus.workingColor = { red = 0.851, green = 0.467, blue = 0.341 }
-spoon.ClaudeStatus.errorColor = { red = 1, green = 0.2, blue = 0.2 }
+spoon.ClaudeMenuBarStatus.callingColor = { red = 0.851, green = 0.467, blue = 0.341 }
+spoon.ClaudeMenuBarStatus.workingColor = { red = 0.851, green = 0.467, blue = 0.341 }
+spoon.ClaudeMenuBarStatus.errorColor = { red = 1, green = 0.2, blue = 0.2 }
 
-spoon.ClaudeStatus:start()
+spoon.ClaudeMenuBarStatus:start()
 ```
 
 `terminalApp` and `ideApp` default to "Warp" and "Windsurf" respectively — change these to match your setup.
