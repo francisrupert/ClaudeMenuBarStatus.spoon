@@ -9,17 +9,22 @@
 ---   - ⚪️ = done (Claude finished its turn)
 ---
 --- Status is driven by Claude Code hooks that write to ~/.claude/status-<pid> files.
---- Each file contains two lines: the status ("working", "calling", or "done") and the PWD.
+--- Each file contains three lines: the status, the working directory, and the subagent count.
 ---
---- Clicking a menu bar item brings the terminal app to front.
+--- Clicking a menu bar item focuses the IDE window for that project.
 ---
 --- Required Claude Code hooks in ~/.claude/settings.json:
 ---   - SessionStart: cleans up dead PID status files
 ---   - UserPromptSubmit: writes "working"
 ---   - PermissionRequest: writes "calling"
+---   - Elicitation: writes "calling"
 ---   - PostToolUse: writes "working"
 ---   - PostToolUseFailure: writes "done"
 ---   - Stop: writes "done"
+---   - StopFailure: writes "error"
+---   - CwdChanged: updates working directory
+---   - SubagentStart: increments subagent count
+---   - SubagentStop: decrements subagent count
 ---   - SessionEnd: deletes status file
 
 local obj = {}
