@@ -74,6 +74,17 @@ Add these hooks to `~/.claude/settings.json`:
         ]
       }
     ],
+    "Elicitation": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf 'calling\\n%s\\n' \"$PWD\" > ~/.claude/status-$CLAUDE_SESSION_PID"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "",
