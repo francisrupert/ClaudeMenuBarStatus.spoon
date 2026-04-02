@@ -6,16 +6,18 @@ A [Hammerspoon](https://www.hammerspoon.org/) spoon that adds per-session menu b
 
 | State | Dot | Meaning |
 |-------|-----|---------|
-| Working | Animated orange/white | Claude is processing |
+| Working | Animated orange/white dot and label | Claude is processing |
 | Calling | Black dot, orange background | Claude needs user input (e.g., permission prompt) |
 | Done | White dot | Claude finished its turn |
-| Error | Red dot | Something went wrong |
+| Error | Red dot and label | Something went wrong |
+
+The label is the basename of the session's working directory (e.g., `my-project`). When subagents are active, it includes the count (e.g., `×3 my-project`).
 
 Clicking a menu bar item focuses the IDE window for that project's directory.
 
 ## How It Works
 
-Claude Code [hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) write status to `~/.claude/status-<pid>` files. The spoon watches that directory and updates menu bar items accordingly. Dead sessions are automatically cleaned up.
+Claude Code [hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) write status to `~/.claude/status-<pid>` files. Each file contains three lines: the status, the working directory, and the active subagent count. The spoon watches that directory and updates menu bar items accordingly. Dead sessions are automatically cleaned up.
 
 ## Prerequisites
 
@@ -34,86 +36,131 @@ hs.loadSpoon("ClaudeStatus")
 spoon.ClaudeStatus:start()
 ```
 
+4. Reload your Hammerspoon config (click the Hammerspoon menu bar icon → Reload Config, or `Cmd+Shift+R`)
+
 ## Hook Configuration
 
-Add these hooks to `~/.claude/settings.json`:
+Merge the following `hooks` key into your existing `~/.claude/settings.json`. Don't replace the whole file — you likely have other settings in there already.
 
 ```json
 {
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "for f in ~/.claude/status-*; do [ -f \"$f\" ] && pid=$(basename \"$f\" | sed 's/status-//') && ! kill -0 \"$pid\" 2>/dev/null && rm \"$f\"; done; true"
+            "command": "for f in ~/.claude/status-*; do [ -f \"$f\" ] && pid=$(basename \"$f\" | sed 's/status-//') && ! kill -0 \"$pid\" 2>/dev/null && rm -f \"$f\"; done; true"
           }
         ]
       }
     ],
     "UserPromptSubmit": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "printf 'working\\n%s\\n' \"$PWD\" > ~/.claude/status-$CLAUDE_SESSION_PID"
+            "command": "f=~/.claude/status-$PPID; n=$(sed -n '3p' \"$f\" 2>/dev/null); printf 'working\\n%s\\n%s\\n' \"$PWD\" \"$n\" > \"$f\""
           }
         ]
       }
     ],
     "PermissionRequest": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "printf 'calling\\n%s\\n' \"$PWD\" > ~/.claude/status-$CLAUDE_SESSION_PID"
+            "command": "f=~/.claude/status-$PPID; n=$(sed -n '3p' \"$f\" 2>/dev/null); printf 'calling\\n%s\\n%s\\n' \"$PWD\" \"$n\" > \"$f\""
           }
         ]
       }
     ],
     "Elicitation": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "printf 'calling\\n%s\\n' \"$PWD\" > ~/.claude/status-$CLAUDE_SESSION_PID"
+            "command": "f=~/.claude/status-$PPID; n=$(sed -n '3p' \"$f\" 2>/dev/null); printf 'calling\\n%s\\n%s\\n' \"$PWD\" \"$n\" > \"$f\""
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "agents=$(find ~/.claude/status-* 2>/dev/null | xargs grep -l \"^working\" 2>/dev/null | grep -v \"status-$CLAUDE_SESSION_PID\" | while read f; do pid=$(basename \"$f\" | sed 's/status-//'); ppid=$(ps -o ppid= -p \"$pid\" 2>/dev/null | tr -d ' '); [ \"$ppid\" = \"$CLAUDE_SESSION_PID\" ] && echo x; done | wc -l | tr -d ' '); printf 'working\\n%s\\n%s\\n' \"$PWD\" \"$agents\" > ~/.claude/status-$CLAUDE_SESSION_PID"
+            "command": "f=~/.claude/status-$PPID; n=$(sed -n '3p' \"$f\" 2>/dev/null); printf 'working\\n%s\\n%s\\n' \"$PWD\" \"$n\" > \"$f\""
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf 'done\\n%s\\n0\\n' \"$PWD\" > ~/.claude/status-$PPID"
           }
         ]
       }
     ],
     "Stop": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "printf 'done\\n%s\\n' \"$PWD\" > ~/.claude/status-$CLAUDE_SESSION_PID"
+            "command": "printf 'done\\n%s\\n0\\n' \"$PWD\" > ~/.claude/status-$PPID"
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf 'error\\n%s\\n0\\n' \"$PWD\" > ~/.claude/status-$PPID"
+          }
+        ]
+      }
+    ],
+    "CwdChanged": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=~/.claude/status-$PPID; s=$(head -1 \"$f\" 2>/dev/null || echo working); n=$(sed -n '3p' \"$f\" 2>/dev/null); printf '%s\\n%s\\n%s\\n' \"$s\" \"$PWD\" \"$n\" > \"$f\""
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=~/.claude/status-$PPID; s=$(head -1 \"$f\" 2>/dev/null || echo working); p=$(sed -n '2p' \"$f\" 2>/dev/null || echo \"$PWD\"); n=$(sed -n '3p' \"$f\" 2>/dev/null || echo 0); n=$((n + 1)); printf '%s\\n%s\\n%s\\n' \"$s\" \"$p\" \"$n\" > \"$f\""
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=~/.claude/status-$PPID; s=$(head -1 \"$f\" 2>/dev/null || echo working); p=$(sed -n '2p' \"$f\" 2>/dev/null || echo \"$PWD\"); n=$(sed -n '3p' \"$f\" 2>/dev/null || echo 1); n=$((n - 1)); [ \"$n\" -lt 0 ] && n=0; printf '%s\\n%s\\n%s\\n' \"$s\" \"$p\" \"$n\" > \"$f\""
           }
         ]
       }
     ],
     "SessionEnd": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "rm -f ~/.claude/status-$CLAUDE_SESSION_PID"
+            "command": "rm -f ~/.claude/status-$PPID"
           }
         ]
       }
@@ -134,9 +181,9 @@ spoon.ClaudeStatus.pollInterval = 2       -- seconds between full scans
 spoon.ClaudeStatus.animInterval = 0.3     -- seconds between animation frames
 spoon.ClaudeStatus.debounceSeconds = 2    -- ignore brief "calling" flickers
 
--- Click behavior
-spoon.ClaudeStatus.terminalApp = "Warp"      -- fallback terminal app
-spoon.ClaudeStatus.ideApp = "Windsurf"       -- IDE to focus on click
+-- Click behavior (set these to your own apps)
+spoon.ClaudeStatus.terminalApp = "Terminal"   -- fallback terminal app
+spoon.ClaudeStatus.ideApp = "VS Code"         -- IDE to focus on click
 
 -- Colors (hs.drawing.color tables)
 spoon.ClaudeStatus.callingColor = { red = 0.851, green = 0.467, blue = 0.341 }
@@ -145,6 +192,8 @@ spoon.ClaudeStatus.errorColor = { red = 1, green = 0.2, blue = 0.2 }
 
 spoon.ClaudeStatus:start()
 ```
+
+`terminalApp` and `ideApp` default to "Warp" and "Windsurf" respectively — change these to match your setup.
 
 ## License
 
