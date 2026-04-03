@@ -60,21 +60,21 @@ obj.debounceSeconds = 2
 --- ClaudeMenuBarStatus.dotFont
 --- Variable
 --- Font used for the status dot emoji. Default: { size = 6 }
-obj.dotFont = { size = 5 }
+obj.dotFont = { name = "Menlo", size = 10 }
 
 --- ClaudeMenuBarStatus.statusDots
 --- Variable
 --- Emoji strings for non-animated states. Keys: "calling", "done", "error".
 obj.statusDots = {
-    calling = "⚫️\u{2002}\u{2002}",
-    done    = "⚪️\u{2002}\u{2002}",
-    error   = "🔴\u{2002}\u{2002}",
+    calling = "✳",
+    done    = "✳",
+    error   = "x",
 }
 
 --- ClaudeMenuBarStatus.workingFrames
 --- Variable
 --- Array of emoji strings that cycle to animate the "working" state.
-obj.workingFrames = { "🟠\u{2002}\u{2002}", "⚪️\u{2002}\u{2002}" }
+obj.workingFrames = { "·", "✻", "✽", "✶", "✳", "✢" }
 
 --- ClaudeMenuBarStatus.callingColor
 --- Variable
@@ -132,7 +132,10 @@ function obj:styledTitle(dot, label, color, bgColor)
         dotStyle.backgroundColor = bgColor
         labelStyle.backgroundColor = bgColor
     end
-    return hs.styledtext.new(dot, dotStyle) .. hs.styledtext.new(label, labelStyle)
+    local padStyle = { font = self.font }
+    if color then padStyle.color = color end
+    if bgColor then padStyle.backgroundColor = bgColor end
+    return hs.styledtext.new("\u{2004}", padStyle) .. hs.styledtext.new(dot, dotStyle) .. hs.styledtext.new(" ", labelStyle) .. hs.styledtext.new(label .. "\u{2004}", labelStyle)
 end
 
 --- ClaudeMenuBarStatus:dirLabel(pwd, agents) -> string
@@ -238,6 +241,7 @@ function obj:update()
             self.menuItems[pid]:setTitle(
                 hs.styledtext.new("\u{2004}", style)
                 .. hs.styledtext.new(self.statusDots["calling"], dotStyle)
+                .. hs.styledtext.new(" ", style)
                 .. hs.styledtext.new(label .. "\u{2004}", style)
             )
         elseif info.status == "working" then
