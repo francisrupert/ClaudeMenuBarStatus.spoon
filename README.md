@@ -1,15 +1,15 @@
 # ClaudeMenuBarStatus.spoon
 
-A [Hammerspoon](https://www.hammerspoon.org/) spoon that adds per-session menu bar indicators for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Each active session gets its own menu bar item showing the project directory name and a color-coded status dot.
+A [Hammerspoon](https://www.hammerspoon.org/) spoon that adds per-session menu bar indicators for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Each active session gets its own menu bar item showing the project directory name and a status indicator.
 
 ## Status States
 
-| State | Dot | Meaning |
-|-------|-----|---------|
-| Working | Animated orange/white dot and label | Claude is processing |
-| Calling | Black dot, orange background | Claude needs user input (e.g., permission prompt) |
-| Done | White dot | Claude finished its turn |
-| Error | Red dot and label | Something went wrong |
+| State | Indicator | Meaning |
+|-------|-----------|---------|
+| Working | Animated ASCII spinner (`· ✻ ✽ ✶ ✳ ✢`) | Claude is processing |
+| Calling | `✳` with orange background | Claude needs user input (e.g., permission prompt) |
+| Done | `✳` | Claude finished its turn |
+| Error | `x` | Something went wrong |
 
 The label is the basename of the session's working directory (e.g., `my-project`). When subagents are active, it includes the count (e.g., `×3 my-project`).
 

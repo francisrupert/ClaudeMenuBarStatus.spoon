@@ -3,10 +3,11 @@
 --- Per-session menu bar status indicator for Claude Code.
 ---
 --- Each active Claude Code session gets its own menu bar item showing the
---- working directory name and a color-coded status dot:
----   - 🟠/⚪️ (animated) = working (Claude is processing)
----   - 🟡 = calling (Claude needs user input, e.g. permission prompt)
----   - ⚪️ = done (Claude finished its turn)
+--- working directory name and a status indicator:
+---   - Animated ASCII spinner (· ✻ ✽ ✶ ✳ ✢) = working (Claude is processing)
+---   - ✳ with orange background = calling (Claude needs user input)
+---   - ✳ = done (Claude finished its turn)
+---   - x = error (something went wrong)
 ---
 --- Status is driven by Claude Code hooks that write to ~/.claude/status-<pid> files.
 --- Each file contains three lines: the status, the working directory, and the subagent count.
@@ -59,12 +60,12 @@ obj.debounceSeconds = 2
 
 --- ClaudeMenuBarStatus.dotFont
 --- Variable
---- Font used for the status dot emoji. Default: { size = 6 }
+--- Font used for the status indicator character. Default: { name = "Menlo", size = 10 }
 obj.dotFont = { name = "Menlo", size = 10 }
 
 --- ClaudeMenuBarStatus.statusDots
 --- Variable
---- Emoji strings for non-animated states. Keys: "calling", "done", "error".
+--- ASCII characters for non-animated states. Keys: "calling", "done", "error".
 obj.statusDots = {
     calling = "✳",
     done    = "✳",
@@ -73,7 +74,7 @@ obj.statusDots = {
 
 --- ClaudeMenuBarStatus.workingFrames
 --- Variable
---- Array of emoji strings that cycle to animate the "working" state.
+--- Array of ASCII characters that cycle to animate the "working" state.
 obj.workingFrames = { "·", "✻", "✽", "✶", "✳", "✢" }
 
 --- ClaudeMenuBarStatus.callingColor
